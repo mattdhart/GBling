@@ -1,6 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Boolean, Column, Date, Integer, String, ForeignKey
+from sqlalchemy import Boolean, Column, Date, Float, Integer, String, ForeignKey
 
 
 Base = declarative_base()
@@ -16,19 +15,46 @@ class Team(Base):
 
 
 class Game(Base):
+    id = Column(Integer, primary_key=True)
     home = Column(ForeignKey('team.id'))
     away = Column(ForeignKey('team.id'))
-    home_score = Column(Integer)
-    away_score = Column(Integer)
     played = Boolean()
     date = Date()
 
 
-def create_engine():
-    pass
-
-
-def create_session(engine=None):
-    if engine is None:
-        engine = create_engine()
-    return sessionmaker(bind=engine)
+class GameFeature(Base):
+    id = Column(Integer, primary_key=True)
+    team = Column(ForeignKey('team.id'))
+    game = Column(ForeignKey('game.id'))
+    fg = Column(Integer)  # Field Goals made
+    fga = Column(Integer)  # Field Goals attempted
+    fgp = Column(Float)  # Field goal percentage
+    3p = Column(Integer)  # 3 pointers made
+    3pa = Column(Integer)  # 3 pointers attempted
+    3pp = Column(Float)  # 3 pointers percentage
+    ft = Column(Integer)  # Free Throws made
+    fta = Column(Integer)  # Free Throws attempted
+    ftp = Column(Float)  # Free throws %
+    orb = Column(Integer)  # Offensive Rebounds
+    drb = Column(Integer)  # Defensive Rebounds
+    trb = Column(Integer)  # Total Rebounds
+    ast = Column(Integer)  # Assists
+    stl = Column(Integer)  # Steals
+    blk = Column(Integer)  # Blocks
+    tov = Column(Integer)  # Turnovers
+    pf = Column(Integer)  # Personal Fouls
+    tsp = Column(Float)  # True Shooting Percentage
+    efgp = Column(Float)  # Effective Field Goal Percentage
+    3par = Column(Float)  # 3 Point attempt rate
+    ftr = Column(Float)  # FT attempt rate
+    orbp = Column(Float)  # Offensive Rebound Percentage
+    drbp = Column(Float)  # Defensive Rebound Percentage
+    trpb = Column(Float)  # Total Rebound Percentage
+    astp = Column(Float)  # Assist rate percentage
+    stlp = Column(Float)  # Steal rate percentage
+    blkp = Column(Float)  # Block rate percentage
+    tovp = Column(Float)  # Turn over rate percentage
+    ortg = Column(Float)  # Offensive Rating
+    drtg = Column(Float)  # Defensive Rating
+    ftfga = Column(Float)  # Ft/FGA Rating
+    pace = Column(Float)  # PACE
