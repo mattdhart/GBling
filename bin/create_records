@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 from __future__ import print_function
+from argparse import ArgumentParser, FileType
 from nba.util.shell import register_sigint_handler
 import os
 import sys
 
 
 def main():
-    print("HI")
+    parser = ArgumentParser(prog="create_records")
+    subparsers = parser.add_subparsers(help="sub-command help") 
+
+    parser_games_csv = subparsers.add_parser('games-csv', help="Parse games values from a csv, adding if they don't exist, overwriting if they do")
+    parser_games_csv.add_argument('csv', type=FileType('r')) 
 
 
 if __name__ == '__main__':

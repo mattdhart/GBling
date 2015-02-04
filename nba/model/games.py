@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Boolean, Column, Date, Float, Integer, String, ForeignKey
 
@@ -6,6 +7,9 @@ Base = declarative_base()
 
 
 class Team(Base):
+    """
+    Represents an NBA team
+    """
     __tablename__ = 'team'
     __table_args__ = {'sqlite_autoincrement': True}
 
@@ -13,19 +17,15 @@ class Team(Base):
     name = Column(String)
     abbr = Column(String)
 
-
-class Game(Base):
-    id = Column(Integer, primary_key=True)
-    home = Column(ForeignKey('team.id'))
-    away = Column(ForeignKey('team.id'))
-    played = Boolean()
-    date = Date()
-
-
+    
 class GameFeature(Base):
+    """
+    Represents the statistics associated with a game or range of games.
+    """
+    __tablename__ = 'game_feature'
+    __table_args__ = {'sqlite_autoincrement': True}
+
     id = Column(Integer, primary_key=True)
-    team = Column(ForeignKey('team.id'))
-    game = Column(ForeignKey('game.id'))
     fg = Column(Integer)  # Field Goals made
     fga = Column(Integer)  # Field Goals attempted
     fgp = Column(Float)  # Field goal percentage
@@ -58,3 +58,36 @@ class GameFeature(Base):
     drtg = Column(Float)  # Defensive Rating
     ftfga = Column(Float)  # Ft/FGA Rating
     pace = Column(Float)  # PACE
+    b2b = Column(Boolean)
+
+
+class Game(Base):
+    """
+    Represents a game with keys to the teams and features 
+    """
+    __tablename__ = 'game'
+    __table_args__ = {'sqlite_autoincrement': True}
+    
+    id = Column(Integer, primary_key=True)
+    home = Column(ForeignKey('team.id'))
+    home_features = Column(ForeignKey('game_feature.id'))
+    away = Column(ForeignKey('team.id'))
+    away_features = Column(ForeignKey('game_feature.id'))
+    played = Column(Boolean)
+    date = Column(Date)
+
+
+class Rollup(Base):
+    """
+    Contains rollup data for a set of features betweeen an inclusive
+    range of games. 
+    """
+    __tablename__ = "game_rollup"
+    __table_args__ = {'sqlite_autoincrement': True}
+
+    id = Column(Integer, primary_key=True)
+    team = Column(ForeignKey('team.id'))
+    start = Column(ForeignKey('game.id'))
+    end = Column(ForeignKey('game.id'))
+    features = Column(ForeignKey('game_feature.id'))
+
