@@ -16,8 +16,9 @@ class Team(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     abbr = Column(String)
+    city = Column(String)
 
-    
+ 
 class GameFeature(Base):
     """
     Represents the statistics associated with a game or range of games.
@@ -26,12 +27,13 @@ class GameFeature(Base):
     __table_args__ = {'sqlite_autoincrement': True}
 
     id = Column(Integer, primary_key=True)
+    score = Column(Integer)  # Final score of team
     fg = Column(Integer)  # Field Goals made
     fga = Column(Integer)  # Field Goals attempted
     fgp = Column(Float)  # Field goal percentage
-    3p = Column(Integer)  # 3 pointers made
-    3pa = Column(Integer)  # 3 pointers attempted
-    3pp = Column(Float)  # 3 pointers percentage
+    threep = Column(Integer)  # three pointers made
+    threepa = Column(Integer)  # three pointers attempted
+    threepp = Column(Float)  # three pointers percentage
     ft = Column(Integer)  # Free Throws made
     fta = Column(Integer)  # Free Throws attempted
     ftp = Column(Float)  # Free throws %
@@ -45,7 +47,7 @@ class GameFeature(Base):
     pf = Column(Integer)  # Personal Fouls
     tsp = Column(Float)  # True Shooting Percentage
     efgp = Column(Float)  # Effective Field Goal Percentage
-    3par = Column(Float)  # 3 Point attempt rate
+    threepar = Column(Float)  # three Point attempt rate
     ftr = Column(Float)  # FT attempt rate
     orbp = Column(Float)  # Offensive Rebound Percentage
     drbp = Column(Float)  # Defensive Rebound Percentage
@@ -58,29 +60,28 @@ class GameFeature(Base):
     drtg = Column(Float)  # Defensive Rating
     ftfga = Column(Float)  # Ft/FGA Rating
     pace = Column(Float)  # PACE
-    b2b = Column(Boolean)
+    b2b = Column(Boolean)  # Was it a back to back?
 
 
 class Game(Base):
     """
-    Represents a game with keys to the teams and features 
+    Represents a game with keys to the teams and features
     """
     __tablename__ = 'game'
     __table_args__ = {'sqlite_autoincrement': True}
-    
+ 
     id = Column(Integer, primary_key=True)
     home = Column(ForeignKey('team.id'))
     home_features = Column(ForeignKey('game_feature.id'))
     away = Column(ForeignKey('team.id'))
     away_features = Column(ForeignKey('game_feature.id'))
-    played = Column(Boolean)
     date = Column(Date)
 
 
 class Rollup(Base):
     """
     Contains rollup data for a set of features betweeen an inclusive
-    range of games. 
+    range of games.
     """
     __tablename__ = "game_rollup"
     __table_args__ = {'sqlite_autoincrement': True}
@@ -90,4 +91,3 @@ class Rollup(Base):
     start = Column(ForeignKey('game.id'))
     end = Column(ForeignKey('game.id'))
     features = Column(ForeignKey('game_feature.id'))
-

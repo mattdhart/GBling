@@ -2,18 +2,31 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
 from argparse import ArgumentParser, FileType
+from nba import config
+from nba.data.reader import game_generator, game_reader 
+from nba.data.writer import game_writer
+from nba.model import create_engine, create_all, create_session
 from nba.util.shell import register_sigint_handler
 import os
 import sys
 
 
-def main():
-    parser = ArgumentParser(prog="create_records")
+def get_parser():
+    parser = ArgumentParser()
     subparsers = parser.add_subparsers(help="sub-command help") 
-
     parser_games_csv = subparsers.add_parser('games-csv', help="Parse games values from a csv, adding if they don't exist, overwriting if they do")
     parser_games_csv.add_argument('csv', type=FileType('r')) 
+    return parser
 
+
+def main():
+    engine = create_engine()
+    create_all(engine)
+    session = create_session(engine)
+    args = get_parser().parse_args()
+    game_reader(game_generator(args.csv), lambda x: game_writer(x, session))
+    session.commit()
+    
 
 if __name__ == '__main__':
     register_sigint_handler();

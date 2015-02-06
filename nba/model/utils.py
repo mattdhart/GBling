@@ -1,5 +1,5 @@
 
-team_abbr_lookup : {
+team_abbr_lookup = {
     "Toronto Raptors": "TOR",
     "Brooklyn Nets": "BRK",
     "New York Knicks": "NYK",
@@ -31,4 +31,3 @@ team_abbr_lookup : {
     "Dallas Mavericks": "DAL",
     "New Orleans Pelicans": "NOP"
 }
-
