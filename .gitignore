@@ -1,3 +1,5 @@
 *.pyc
 env/
 nba.egg-info/
+data/*.html
+data/*.db

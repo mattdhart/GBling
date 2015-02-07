@@ -1,6 +1,9 @@
 # -*- coding: utf8 -*-
-from sqlalchemy.ext.declarative import declarative_base
+from datetime import date
+from nba.model.utils import oddsshark_team_id_lookup
 from sqlalchemy import Boolean, Column, Date, Float, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, backref
 
 
 Base = declarative_base()
@@ -17,6 +20,9 @@ class Team(Base):
     name = Column(String)
     abbr = Column(String)
     city = Column(String)
+
+    def get_odds_url(self, year):
+        return "http://www.oddsshark.com/stats/gamelog/basketball/nba/{0}/{1}".format(oddsshark_team_id_lookup.get(self.name), year)
 
  
 class GameFeature(Base):
@@ -63,6 +69,15 @@ class GameFeature(Base):
     b2b = Column(Boolean)  # Was it a back to back?
 
 
+class Odds(Base):
+    __tablename__ = 'odds'
+    __table_args__ = {'sqlite_autoincrement': True}
+    
+    id = Column(Integer, primary_key=True)
+    spread = Column(Integer)
+    overunder = Column(Integer)
+
+
 class Game(Base):
     """
     Represents a game with keys to the teams and features
@@ -71,11 +86,21 @@ class Game(Base):
     __table_args__ = {'sqlite_autoincrement': True}
  
     id = Column(Integer, primary_key=True)
-    home = Column(ForeignKey('team.id'))
-    home_features = Column(ForeignKey('game_feature.id'))
-    away = Column(ForeignKey('team.id'))
-    away_features = Column(ForeignKey('game_feature.id'))
+    home_id = Column(ForeignKey('team.id'))
+    home = relationship("Team", backref=backref("game_home", order_by=id), foreign_keys=[home_id])
+    home_features_id = Column(ForeignKey('game_feature.id'))
+    home_features = relationship("GameFeature", backref=backref("game_home_features", order_by=id), foreign_keys=[home_features_id])
+    away_id = Column(ForeignKey('team.id'))
+    away = relationship("Team", backref=backref("game_away", order_by=id), foreign_keys=[away_id])
+    away_features_id = Column(ForeignKey('game_feature.id'))
+    away_features = relationship("GameFeature", backref=backref("game_away_features", order_by=id), foreign_keys=[away_features_id])
     date = Column(Date)
+    odds_id = Column(ForeignKey('odds.id'))
+    odds = relationship("Odds", backref=backref("game", order_by=id))
+
+    def get_br_url(self):
+        """Returns the URL for the basketball-reference.com box scores"""
+        return "http://www.basketball-reference.com/boxscores/{0}{1}{2}0{3}.html".format(self.date.year, str(self.date.month).zfill(2), str(self.date.day).zfill(2), self.home.abbr)
 
 
 class Rollup(Base):
@@ -87,7 +112,11 @@ class Rollup(Base):
     __table_args__ = {'sqlite_autoincrement': True}
 
     id = Column(Integer, primary_key=True)
-    team = Column(ForeignKey('team.id'))
-    start = Column(ForeignKey('game.id'))
-    end = Column(ForeignKey('game.id'))
-    features = Column(ForeignKey('game_feature.id'))
+    team_id = Column(ForeignKey('team.id'))
+    team = relationship("Team", backref=backref("game_rollup", order_by=id))
+    start_id = Column(ForeignKey('game.id'))
+    start = relationship("Game", backref=backref("game_rollup_start", order_by=id), foreign_keys=[start_id])
+    end_id = Column(ForeignKey('game.id'))
+    end = relationship("Game", backref=backref("game_rollup_end", order_by=id), foreign_keys=[end_id])
+    features_id = Column(ForeignKey('game_feature.id'))
+    features = relationship("GameFeature", backref=backref("game_rollup", order_by=id))

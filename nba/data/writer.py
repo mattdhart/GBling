@@ -27,9 +27,8 @@ def game_writer(game, session):
         home_team = team_writer(home_team_str, session)
         away_team = team_writer(away_team_str, session)
 
-        saved_game = Game(home=home_team.id, away=away_team.id, date=game_date)
+        saved_game = get_or_create(session, Game, home_id=home_team.id, away_id=away_team.id, date=game_date)
         session.add(saved_game)
     except ValueError, e:
-        print "Exception: ", e
         return
     

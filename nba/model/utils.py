@@ -13,6 +13,7 @@ team_abbr_lookup = {
     "Miami Heat": "MIA",
     "Washington Wizards": "WAS",
     "Charlotte Bobcats": "CHA",
+    "Charlotte Hornets": "CHA",
     "Atlanta Hawks": "ATL",
     "Orlando Magic": "ORL",
     "Oklahoma City Thunder": "OKC",
@@ -30,4 +31,38 @@ team_abbr_lookup = {
     "Memphis Grizzlies": "MEM",
     "Dallas Mavericks": "DAL",
     "New Orleans Pelicans": "NOP"
+}
+
+
+oddsshark_team_id_lookup = {
+    "Toronto Raptors": 20742,
+    "Brooklyn Nets": 20749,
+    "New York Knicks": 20747,
+    "Boston Celtics": 20722,
+    "Philadelphia 76ers": 20731,
+    "Indiana Pacers": 20737,
+    "Chicago Bulls": 20732,
+    "Cleveland Cavaliers": 20735,
+    "Detroit Pistons": 20743,
+    "Milwaukee Bucks": 20725,
+    "Miami Heat": 20726,
+    "Washington Wizards": 20746,
+    "Charlotte Bobcats": 20751,
+    "Atlanta Hawks": 20734,
+    "Orlando Magic": 20750,
+    "Oklahoma City Thunder": 20728,
+    "Portland Trail Blazers": 20748,
+    "Minnesota Timberwolves": 20744,
+    "Denver Nuggets": 20723,
+    "Utah Jazz": 20738,
+    "Los Angeles Clippers": 20736,
+    "Golden State Warriors": 20741,
+    "Phoenix Suns": 20730,
+    "Sacramento Kings": 20745,
+    "Los Angeles Lakers": 20739,
+    "San Antonio Spurs": 20724,
+    "Houston Rockets": 20740,
+    "Memphis Grizzlies": 20729,
+    "Dallas Mavericks": 20727,
+    "New Orleans Pelicans": 20733
 }

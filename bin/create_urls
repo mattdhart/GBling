@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
+from __future__ import print_function
+from argparse import ArgumentParser, ArgumentTypeError
+from dateutil.parser import parse
+from datetime import date, timedelta
+from nba import config
+from nba.data.reader import save_urls_to_file
+from nba.model import create_engine, create_all, create_session
+from nba.model.games import Game, Team
+from nba.util.shell import register_sigint_handler
+from sqlalchemy import desc, or_
+import os
+import sys
+
+
+session = create_session(create_engine())
+
+
+def date_argument(string):
+    try:
+        return parse(string)
+    except:
+        raise ArgumentTypeError("{0} is not a valid date string".format(string))
+
+
+def year_argument(string):
+    if string not in ('2012', '2013', '2014'):
+        raise ArgumentTypeError("{0} not a valid year".format(string))
+    return int(string)
+
+
+def team_argument(string):
+    instance = session.query(Team).filter_by(name=string).first()
+    if instance:
+        return instance
+    else:
+        raise ArgumentTypeError("{0} is not a valid team name".format(string))
+
+
+def get_yesterday():
+    return date.today() - timedelta(1)
+
+
+def odds(args):
+    if args.team is None:
+        teams = session.query(Team).all()
+    else:
+        teams = [args.team,]
+    if args.year == -1:
+        years = [2012, 2013, 2014]
+    else:
+        years = [args.year,]
+    urls = []
+    files = []
+    for team in teams:
+        for year in years:
+            url = team.get_odds_url(year)
+            urls.append(url)
+            files.append(os.path.join(config.DATA_DIRECTORY, 'odds_{0}_{1}.html'.format(team.abbr, year)))
+    save_urls_to_file(urls, files)
+
+
+def ref(args):
+    if args.team is None:
+        teams = session.query(Team.id)
+    else:
+        teams = [args.team,]
+    if args.start_date is None:
+        game = session.query(Game).order_by(Game.date).first()
+        start_date = game.date
+    else:
+        start_date = args.start_date
+    if args.end_date is None:
+        end_date = get_yesterday()
+    else:
+        end_date = args.end_date
+
+    games = session.query(Game).distinct().filter(Game.date>=start_date).filter(Game.date<=end_date).filter(or_(Game.home_id.in_(teams), Game.away_id.in_(teams))).all()
+    for game in games:
+        url = game.get_br_url()
+        br_file = os.path.join(config.DATA_DIRECTORY, 'br_{0}_{1}.html'.format(game.home.abbr, game.date.strftime("%Y-%m-%d")))
+        print(url, br_file)
+
+
+def get_parser():
+    parser = ArgumentParser()
+
+    subparsers = parser.add_subparsers(help="sub-command help") 
+    parser_odds = subparsers.add_parser('odds', help="Pull OddsShark data dump for games for one or more teams")
+    parser_odds.add_argument("-y", "--year", type=year_argument, default=-1)
+    parser_odds.add_argument("-t", "--team", type=team_argument, default=None)
+    parser_odds.set_defaults(func=odds)
+
+    parser_box_scores = subparsers.add_parser('box-scores', help="Pull basketball-reference box score data dump for one or more teams or date ranges")
+    parser_box_scores.add_argument("-t", "--team", type=team_argument, default=None)
+    parser_box_scores.add_argument("-s", "--start-date", type=date_argument, default=None, help="The date from which we should start dumping data")
+    parser_box_scores.add_argument("-e", "--end-date", type=date_argument, default=get_yesterday(), help="The date to which we should end dumping data")
+    parser_box_scores.set_defaults(func=ref)
+    return parser
+
+
+def main():
+    args = get_parser().parse_args()
+    args.func(args)
+    
+    #session.commit()
+    
+
+if __name__ == '__main__':
+    register_sigint_handler();
+    main()
+
