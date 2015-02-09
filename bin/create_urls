@@ -76,11 +76,15 @@ def ref(args):
     else:
         end_date = args.end_date
 
-    games = session.query(Game).distinct().filter(Game.date>=start_date).filter(Game.date<=end_date).filter(or_(Game.home_id.in_(teams), Game.away_id.in_(teams))).all()
+    games = session.query(Game).distinct().filter(Game.date>=start_date).filter(Game.date<=end_date).filter(or_(Game.home_id.in_(teams), Game.away_id.in_(teams))).order_by(Game.date)
+    urls = []
+    files = []
     for game in games:
         url = game.get_br_url()
         br_file = os.path.join(config.DATA_DIRECTORY, 'br_{0}_{1}.html'.format(game.home.abbr, game.date.strftime("%Y-%m-%d")))
-        print(url, br_file)
+        urls.append(url)
+        files.append(br_file)
+    save_urls_to_file(urls, files)
 
 
 def get_parser():

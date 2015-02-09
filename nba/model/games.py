@@ -6,6 +6,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
 
+NOP_TO_NOH_DATE = date(2013, 10, 29)
+
+
 Base = declarative_base()
 
 
@@ -74,8 +77,8 @@ class Odds(Base):
     __table_args__ = {'sqlite_autoincrement': True}
     
     id = Column(Integer, primary_key=True)
-    spread = Column(Integer)
-    overunder = Column(Integer)
+    spread = Column(Float)
+    overunder = Column(Float)
 
 
 class Game(Base):
@@ -100,7 +103,11 @@ class Game(Base):
 
     def get_br_url(self):
         """Returns the URL for the basketball-reference.com box scores"""
-        return "http://www.basketball-reference.com/boxscores/{0}{1}{2}0{3}.html".format(self.date.year, str(self.date.month).zfill(2), str(self.date.day).zfill(2), self.home.abbr)
+        if self.home.abbr == 'NOP' and self.date < NOP_TO_NOH_DATE:
+            abbr = 'NOH'
+        else:
+            abbr = self.home.abbr
+        return "http://www.basketball-reference.com/boxscores/{0}{1}{2}0{3}.html".format(self.date.year, str(self.date.month).zfill(2), str(self.date.day).zfill(2), abbr)
 
 
 class Rollup(Base):

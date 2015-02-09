@@ -3,3 +3,6 @@ env/
 nba.egg-info/
 data/*.html
 data/*.db
+.tox/
+data/br/
+data/odds/
