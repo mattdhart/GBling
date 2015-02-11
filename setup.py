@@ -10,6 +10,7 @@ config = {
     'version': '0.1',
     'install_requires': ['nose'],
     'packages': ['nba'],
+    'include_package_data': True,
     'scripts': [],
     'name': 'nba'
 }

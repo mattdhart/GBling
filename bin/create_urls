@@ -17,15 +17,20 @@ import sys
 session = create_session(create_engine())
 
 
+def get_game_years():
+    return set([game.date.year for game in session.query(Game).all() if game.date is not None])
+
+
 def date_argument(string):
     try:
-        return parse(string)
+        return parse(string).date()
     except:
         raise ArgumentTypeError("{0} is not a valid date string".format(string))
 
 
 def year_argument(string):
-    if string not in ('2012', '2013', '2014'):
+    years = get_game_years()
+    if int(string) not in years:
         raise ArgumentTypeError("{0} not a valid year".format(string))
     return int(string)
 
@@ -48,7 +53,7 @@ def odds(args):
     else:
         teams = [args.team,]
     if args.year == -1:
-        years = [2012, 2013, 2014]
+        years = get_game_years()
     else:
         years = [args.year,]
     urls = []
@@ -108,7 +113,7 @@ def main():
     args = get_parser().parse_args()
     args.func(args)
     
-    #session.commit()
+    session.commit()
     
 
 if __name__ == '__main__':

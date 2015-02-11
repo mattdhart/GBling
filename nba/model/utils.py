@@ -34,6 +34,40 @@ team_abbr_lookup = {
 }
 
 
+abbr_team_lookup = {
+    "TOR": "Toronto Raptors",
+    "BRK": "Brooklyn Nets",
+    "NYK": "New York Knicks",
+    "BOS": "Boston Celtics",
+    "PHI": "Philadelphia 76ers",
+    "IND": "Indiana Pacers",
+    "CHI": "Chicago Bulls",
+    "CLE": "Cleveland Cavaliers",
+    "DET": "Detroit Pistons",
+    "MIL": "Milwaukee Bucks",
+    "MIA": "Miami Heat",
+    "WAS": "Washington Wizards",
+    "CHA": "Charlotte Hornets",
+    "ATL": "Atlanta Hawks",
+    "ORL": "Orlando Magic",
+    "OKC": "Oklahoma City Thunder",
+    "POR": "Portland Trail Blazers",
+    "MIN": "Minnesota Timberwolves",
+    "DEN": "Denver Nuggets",
+    "UTA": "Utah Jazz",
+    "LAC": "Los Angeles Clippers",
+    "GSW": "Golden State Warriors",
+    "PHO": "Phoenix Suns",
+    "SAC": "Sacramento Kings",
+    "LAL": "Los Angeles Lakers",
+    "SAS": "San Antonio Spurs",
+    "HOU": "Houston Rockets",
+    "MEM": "Memphis Grizzlies",
+    "DAL": "Dallas Mavericks",
+    "NOP": "New Orleans Pelicans"
+}
+
+
 oddsshark_team_id_lookup = {
     "Toronto Raptors": 20742,
     "Brooklyn Nets": 20749,
@@ -65,4 +99,39 @@ oddsshark_team_id_lookup = {
     "Memphis Grizzlies": 20729,
     "Dallas Mavericks": 20727,
     "New Orleans Pelicans": 20733
+}
+
+
+oddsshark_city_lookup = {
+    "Toronto": "Toronto Raptors",
+    "Brooklyn": "Brooklyn Nets",
+    "New York": "New York Knicks",
+    "Boston": "Boston Celtics",
+    "Philadelphia": "Philadelphia 76ers",
+    "Indiana": "Indiana Pacers",
+    "Chicago": "Chicago Bulls",
+    "Cleveland": "Cleveland Cavaliers",
+    "Detroit": "Detroit Pistons",
+    "Milwaukee": "Milwaukee Bucks",
+    "Miami": "Miami Heat",
+    "Washington": "Washington Wizards",
+    "Charlotte": "Charlotte Hornets",
+    "Atlanta": "Atlanta Hawks",
+    "Orlando": "Orlando Magic",
+    "Oklahoma City": "Oklahoma City Thunder",
+    "Portland": "Portland Trail Blazers",
+    "Minnesota": "Minnesota Timberwolves",
+    "Denver": "Denver Nuggets",
+    "Utah": "Utah Jazz",
+    "LA Clippers": "Los Angeles Clippers",
+    "Golden State": "Golden State Warriors",
+    "Phoenix": "Phoenix Suns",
+    "Sacramento": "Sacramento Kings",
+    "LA Lakers": "Los Angeles Lakers",
+    "San Antonio": "San Antonio Spurs",
+    "Houston": "Houston Rockets",
+    "Memphis": "Memphis Grizzlies",
+    "Dallas": "Dallas Mavericks",
+    "New Orleans": "New Orleans Pelicans"
+
 }

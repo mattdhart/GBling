@@ -13,6 +13,7 @@ Base = declarative_base()
 
 
 class Team(Base):
+
     """
     Represents an NBA team
     """
@@ -27,8 +28,9 @@ class Team(Base):
     def get_odds_url(self, year):
         return "http://www.oddsshark.com/stats/gamelog/basketball/nba/{0}/{1}".format(oddsshark_team_id_lookup.get(self.name), year)
 
- 
+
 class GameFeature(Base):
+
     """
     Represents the statistics associated with a game or range of games.
     """
@@ -75,19 +77,20 @@ class GameFeature(Base):
 class Odds(Base):
     __tablename__ = 'odds'
     __table_args__ = {'sqlite_autoincrement': True}
-    
+
     id = Column(Integer, primary_key=True)
     spread = Column(Float)
     overunder = Column(Float)
 
 
 class Game(Base):
+
     """
     Represents a game with keys to the teams and features
     """
     __tablename__ = 'game'
     __table_args__ = {'sqlite_autoincrement': True}
- 
+
     id = Column(Integer, primary_key=True)
     home_id = Column(ForeignKey('team.id'))
     home = relationship("Team", backref=backref("game_home", order_by=id), foreign_keys=[home_id])
@@ -111,6 +114,7 @@ class Game(Base):
 
 
 class Rollup(Base):
+
     """
     Contains rollup data for a set of features betweeen an inclusive
     range of games.

@@ -1,34 +1,56 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 from __future__ import print_function
-from argparse import ArgumentParser, FileType
-from nba import config
-from nba.data.reader import game_generator, pipeline 
-from nba.data.writer import game_writer
+from argparse import ArgumentParser, ArgumentTypeError, FileType
+from glob import glob
+from nba.data.reader import parse_file_for_odds, pipeline, game_generator
+from nba.data.writer import game_writer, odds_writer
 from nba.model import create_engine, create_all, create_session
 from nba.util.shell import register_sigint_handler
-import os
-import sys
+
+
+engine = create_engine()
+session = create_session(create_engine())
+
+
+def glob_argument(string):
+    try:
+        return glob(string)
+    except:
+        raise ArgumentTypeError("{0} is not a valid glob".format(string))
 
 
 def get_parser():
     parser = ArgumentParser()
-    subparsers = parser.add_subparsers(help="sub-command help") 
+    subparsers = parser.add_subparsers(help="sub-command help")
+
     parser_games_csv = subparsers.add_parser('games-csv', help="Parse games values from a csv, adding if they don't exist, overwriting if they do")
-    parser_games_csv.add_argument('-c', '--csv', type=FileType('r')) 
+    parser_games_csv.add_argument('-c', '--csv', type=FileType('r'))
+    parser_games_csv.set_defaults(func=games_csv)
+
+    parser_odds_html = subparsers.add_parser('odds-html', help="Parse an oddsshark HTML to pull out the odds associated with a given game")
+    parser_odds_html.add_argument('-g', '--glob', type=glob_argument, default=None, help="The glob of files to parse")
+    parser_odds_html.set_defaults(func=odds_html)
     return parser
 
 
-def main():
-    engine = create_engine()
+def games_csv(args):
     create_all(engine)
-    session = create_session(engine)
-    args = get_parser().parse_args()
     pipeline(game_generator(args.csv), lambda x: game_writer(x, session))
     session.commit()
-    
+
+
+def odds_html(args):
+    for filename in args.glob:
+        pipeline(parse_file_for_odds(filename), lambda x: odds_writer(x, session))
+    session.commit()
+
+
+def main():
+    args = get_parser().parse_args()
+    args.func(args)
+
 
 if __name__ == '__main__':
-    register_sigint_handler();
+    register_sigint_handler()
     main()
-
