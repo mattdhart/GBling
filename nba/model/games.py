@@ -1,12 +1,13 @@
 # -*- coding: utf8 -*-
 from datetime import date
 from nba.model.utils import oddsshark_team_id_lookup
-from sqlalchemy import Boolean, Column, Date, Float, Integer, String, ForeignKey
+from sqlalchemy import Column, Date, Float, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
 
 NOP_TO_NOH_DATE = date(2013, 10, 29)
+CHA_TO_CHO_DATE = date(2014, 10, 27)
 
 
 Base = declarative_base()
@@ -71,7 +72,6 @@ class GameFeature(Base):
     drtg = Column(Float)  # Defensive Rating
     ftfga = Column(Float)  # Ft/FGA Rating
     pace = Column(Float)  # PACE
-    b2b = Column(Boolean)  # Was it a back to back?
 
 
 class Odds(Base):
@@ -108,6 +108,8 @@ class Game(Base):
         """Returns the URL for the basketball-reference.com box scores"""
         if self.home.abbr == 'NOP' and self.date < NOP_TO_NOH_DATE:
             abbr = 'NOH'
+        elif self.home.abbr == "CHA" and self.date > CHA_TO_CHO_DATE:
+            abbr = "CHO"
         else:
             abbr = self.home.abbr
         return "http://www.basketball-reference.com/boxscores/{0}{1}{2}0{3}.html".format(self.date.year, str(self.date.month).zfill(2), str(self.date.day).zfill(2), abbr)

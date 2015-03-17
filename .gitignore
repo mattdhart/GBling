@@ -6,3 +6,6 @@ data/*.db
 .tox/
 data/boxscores/
 data/odds/
+build/
+dist/
+.ropeproject

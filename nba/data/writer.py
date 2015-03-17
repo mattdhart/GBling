@@ -1,6 +1,6 @@
 from dateutil.parser import parse
 from nba.model import get_or_create
-from nba.model.games import Game, Odds, Team
+from nba.model.games import Game, GameFeature, Odds, Team
 from nba.model.utils import oddsshark_city_lookup, team_abbr_lookup
 
 
@@ -82,3 +82,25 @@ def odds_writer(odds, session):
     odds = get_or_create(session, Odds, spread=spread, overunder=outotal)
     session.add(odds)
     game.odds = odds
+
+
+def box_score_writer(box, session):
+    game, team = session.query(Game, Team).\
+        filter(Game.home_id == Team.id).\
+        filter(Team.name == box['home_team']).\
+        filter(Game.date == box['date']).\
+        first()
+    if game is None:
+        raise Exception("Could not find game for team: {0} and date: {1}".format(box['home_team'], box['date']))
+
+    if game.home_features is None:
+        home_dict = {key[5:]: val for key, val in box['features'].iteritems() if key.startswith('home')}
+        home_features = GameFeature(**home_dict)
+        session.add(home_features)
+        game.home_features = home_features
+
+    if game.away_features is None:
+        away_dict = {key[5:]: val for key, val in box['features'].iteritems() if key.startswith('away')}
+        away_features = GameFeature(**away_dict)
+        session.add(away_features)
+        game.away_features = away_features

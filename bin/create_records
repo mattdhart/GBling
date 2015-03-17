@@ -3,8 +3,8 @@
 from __future__ import print_function
 from argparse import ArgumentParser, ArgumentTypeError, FileType
 from glob import glob
-from nba.data.reader import parse_file_for_odds, pipeline, game_generator
-from nba.data.writer import game_writer, odds_writer
+from nba.data.reader import parse_file_for_odds, pipeline, game_generator, parse_file_for_box
+from nba.data.writer import game_writer, odds_writer, box_score_writer
 from nba.model import create_engine, create_all, create_session
 from nba.util.shell import register_sigint_handler
 
@@ -31,6 +31,10 @@ def get_parser():
     parser_odds_html = subparsers.add_parser('odds-html', help="Parse an oddsshark HTML to pull out the odds associated with a given game")
     parser_odds_html.add_argument('-g', '--glob', type=glob_argument, default=None, help="The glob of files to parse")
     parser_odds_html.set_defaults(func=odds_html)
+
+    parser_box_html = subparsers.add_parser('box-html', help="Parse a boxscore HTML from br.com to pull out the stats associated with a given game")
+    parser_box_html.add_argument('-g', '--glob', type=glob_argument, default=None, help="The glob of files to parse")
+    parser_box_html.set_defaults(func=box_html)
     return parser
 
 
@@ -43,6 +47,12 @@ def games_csv(args):
 def odds_html(args):
     for filename in args.glob:
         pipeline(parse_file_for_odds(filename), lambda x: odds_writer(x, session))
+    session.commit()
+
+
+def box_html(args):
+    for filename in args.glob:
+        box_score_writer(parse_file_for_box(filename), session)
     session.commit()
 
 

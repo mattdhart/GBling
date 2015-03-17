@@ -6,12 +6,11 @@ from dateutil.parser import parse
 from datetime import date, timedelta
 from nba import config
 from nba.data.reader import save_urls_to_file
-from nba.model import create_engine, create_all, create_session
+from nba.model import create_engine, create_session
 from nba.model.games import Game, Team
 from nba.util.shell import register_sigint_handler
-from sqlalchemy import desc, or_
+from sqlalchemy import or_
 import os
-import sys
 
 
 session = create_session(create_engine())
@@ -36,7 +35,7 @@ def year_argument(string):
 
 
 def team_argument(string):
-    instance = session.query(Team).filter_by(name=string).first()
+    instance = session.query(Team.id).filter_by(name=string).first()
     if instance:
         return instance
     else:
@@ -51,11 +50,11 @@ def odds(args):
     if args.team is None:
         teams = session.query(Team).all()
     else:
-        teams = [args.team,]
+        teams = [args.team, ]
     if args.year == -1:
         years = get_game_years()
     else:
-        years = [args.year,]
+        years = [args.year, ]
     urls = []
     files = []
     for team in teams:
@@ -68,20 +67,28 @@ def odds(args):
 
 def ref(args):
     if args.team is None:
-        teams = session.query(Team.id)
+        teams = session.query(Team.id).all()
     else:
-        teams = [args.team,]
+        teams = args.team
+
     if args.start_date is None:
         game = session.query(Game).order_by(Game.date).first()
         start_date = game.date
     else:
         start_date = args.start_date
+
     if args.end_date is None:
         end_date = get_yesterday()
     else:
         end_date = args.end_date
 
-    games = session.query(Game).distinct().filter(Game.date>=start_date).filter(Game.date<=end_date).filter(or_(Game.home_id.in_(teams), Game.away_id.in_(teams))).order_by(Game.date)
+    games = session.query(Game).distinct().\
+        filter(Game.date >= start_date).\
+        filter(Game.date <= end_date).\
+        filter(or_(Game.home_id.in_(teams), Game.away_id.in_(teams))).\
+        order_by(Game.date).\
+        all()
+
     urls = []
     files = []
     for game in games:
@@ -95,7 +102,7 @@ def ref(args):
 def get_parser():
     parser = ArgumentParser()
 
-    subparsers = parser.add_subparsers(help="sub-command help") 
+    subparsers = parser.add_subparsers(help="sub-command help")
     parser_odds = subparsers.add_parser('odds', help="Pull OddsShark data dump for games for one or more teams")
     parser_odds.add_argument("-y", "--year", type=year_argument, default=-1)
     parser_odds.add_argument("-t", "--team", type=team_argument, default=None)
@@ -112,11 +119,10 @@ def get_parser():
 def main():
     args = get_parser().parse_args()
     args.func(args)
-    
+
     session.commit()
-    
+
 
 if __name__ == '__main__':
-    register_sigint_handler();
+    register_sigint_handler()
     main()
-
