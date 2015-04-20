@@ -6,3 +6,6 @@ python-dateutil==1.5
 BeautifulSoup4==4.3.2
 numpy==1.9
 scikit-learn==0.15
+scipy==0.15
+pandas==0.16
+ipython==3.1

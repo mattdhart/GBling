@@ -9,3 +9,5 @@ data/odds/
 build/
 dist/
 .ropeproject
+data/model/*.model*
+

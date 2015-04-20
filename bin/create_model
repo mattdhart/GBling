@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
+from __future__ import print_function
+from argparse import ArgumentParser, ArgumentTypeError
+from dateutil.parser import parse
+from nba import config
+from nba.model import create_engine, create_session
+from nba.model.games import Game, GameFeature
+from nba.util.shell import register_sigint_handler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
+from sklearn.pipeline import Pipeline
+from sklearn.svm import LinearSVC
+import os
+import pandas
+
+
+engine = create_engine()
+session = create_session(create_engine())
+
+
+def get_parser():
+    parser = ArgumentParser()
+    parser.add_argument('-s', '--start-date', type=date_argument)
+    parser.add_argument('-e', '--end-date', type=date_argument)
+    parser.add_argument('-o', '--output')
+
+    return parser
+
+
+def date_argument(string):
+    try:
+        return parse(string).date()
+    except:
+        raise ArgumentTypeError("{0} is not a valid date string".format(string))
+
+
+def get_games(start_date, end_date):
+    return [game for game in session.query(Game).filter(Game.date.between(start_date, end_date)).all()]
+
+
+def create_model(args):
+    games = get_games(args.start_date, args.end_date)
+    # Extract the name of the columns - manually add score to the end
+    cols = [col.name for col in GameFeature.__table__.columns if col.name not in ('id', 'score')] + ['score']
+    # Create our training features
+    features = []
+    for game in games:
+        home_f, away_f = game.home_features, game.away_features
+        features.append([float(getattr(home_f, col)) for col in cols])
+        features.append([float(getattr(away_f, col)) for col in cols])
+
+    # EXPERIMENTAL
+    # 1) Create data frame
+    frame = pandas.DataFrame(features, columns=cols)
+
+    # 2) Extract the training features omitting the scoring column
+    train_features = frame.columns[:len(frame.columns)-1]
+
+    # 3) Create the classifier, using feature selection
+    clf = Pipeline([
+        ('feature_selection', LinearSVC(penalty="l1", dual=False)),
+        ('classification', RandomForestClassifier(n_jobs=2))
+    ])
+    clf.fit(frame[train_features], frame['score'])
+
+    # 4) Save it
+    joblib.dump(clf, os.path.join(config.MODEL_DIRECTORY, args.output))
+
+
+def main():
+    args = get_parser().parse_args()
+    create_model(args)
+
+
+if __name__ == '__main__':
+    register_sigint_handler()
+    main()
