@@ -115,8 +115,8 @@ def extract_advanced(table, prefix=''):
         prefix + 'stlp': get_nth_value_from_table(table, 11),
         prefix + 'blkp': get_nth_value_from_table(table, 12),
         prefix + 'tovp': get_nth_value_from_table(table, 13),
-        prefix + 'ortg': get_nth_value_from_table(table, 14),
-        prefix + 'drtg': get_nth_value_from_table(table, 15),
+        prefix + 'ortg': get_nth_value_from_table(table, 15),
+        prefix + 'drtg': get_nth_value_from_table(table, 16),
     }
 
 

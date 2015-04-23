@@ -9,8 +9,6 @@ from nba.model.games import Game, GameFeature
 from nba.util.shell import register_sigint_handler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
-from sklearn.pipeline import Pipeline
-from sklearn.svm import LinearSVC
 import os
 import pandas
 
@@ -41,27 +39,27 @@ def get_games(start_date, end_date):
 
 def create_model(args):
     games = get_games(args.start_date, args.end_date)
-    # Extract the name of the columns - manually add score to the end
-    cols = [col.name for col in GameFeature.__table__.columns if col.name not in ('id', 'score')] + ['score']
+    # Extract the name of the columns
+    cols = [col.name for col in GameFeature.__table__.columns if col.name not in ('id', 'score', 'pace', 'fg', 'threep')]
     # Create our training features
     features = []
     for game in games:
         home_f, away_f = game.home_features, game.away_features
-        features.append([float(getattr(home_f, col)) for col in cols])
-        features.append([float(getattr(away_f, col)) for col in cols])
+        # Create a set of features for the home team separate from the away team
+        features.append([float(getattr(home_f, col)) for col in cols] + [float(getattr(away_f, col)) for col in cols] + [float(True)] + [float(home_f.score)])
+        features.append([float(getattr(away_f, col)) for col in cols] + [float(getattr(home_f, col)) for col in cols] + [float(False)] + [float(away_f.score)])
+
+    feature_cols = map(lambda x: "h_{0}".format(x), cols) + map(lambda x: "a_{0}".format(x), cols) + ['is_home', 'score']
 
     # EXPERIMENTAL
     # 1) Create data frame
-    frame = pandas.DataFrame(features, columns=cols)
+    frame = pandas.DataFrame(features, columns=feature_cols)
 
     # 2) Extract the training features omitting the scoring column
     train_features = frame.columns[:len(frame.columns)-1]
 
     # 3) Create the classifier, using feature selection
-    clf = Pipeline([
-        ('feature_selection', LinearSVC(penalty="l1", dual=False)),
-        ('classification', RandomForestClassifier(n_jobs=2))
-    ])
+    clf = RandomForestClassifier(n_jobs=2, n_estimators=100)
     clf.fit(frame[train_features], frame['score'])
 
     # 4) Save it
